@@ -1,2 +1,2 @@
 # Search-Algorithms
-Currently contains implementation of the BFS search algorithm.
+Currently contains an implementation of the BFS search algorithm.
