@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -65,19 +66,18 @@ public:
 	void setHead(Simple_Node* head) {
 		Head = head;
 	}
-
-	// Returns first element of queue
+	// FRONT() - Returns first element of queue (getter)
 	Simple_Node* Front() {
 		return Head;
 	}
-	// Returns TRUE if queue is empty, else FALSE
+	// EMPTY() - Returns TRUE if queue is empty, else FALSE
 	bool Empty() {
 		if (Head == NULL)
 			return true;
 		else
 			return false;
 	}
-	// Enqueue
+	// ENQUEUE()
 	void Enqueue(Simple_Node* simple_node) {
 		if (Head == NULL) {
 			Head = simple_node;
@@ -89,7 +89,7 @@ public:
 			iter->setSimpleNext(simple_node);
 		}
 	}
-	// Dequeue
+	// DEQUEUE()
 	Simple_Node* Dequeue() {
 		Simple_Node* temp = Head;
 		Head = Head->getSimpleNext();
@@ -102,13 +102,13 @@ class Graph {
 private:
 	Double_Node* neighbors_list_head;
 	int num_of_vertices;
-	bool* visited_array;
+	vector<bool> visited;
 	Queue Q = Queue(NULL);
 public:
 	// constructor
 	Graph(string s) {
-		int n = 0; // vertices counter
-		int s_size = s.size(); // input string size
+		num_of_vertices = 0;
+		size_t s_size = s.size(); // input string size
 		size_t find_start = 0; // start position for the 'find' function
 		size_t substr_start = 0; // start position for the 'substr' function
 		size_t substr_end = 0; // end position for the 'substr' function, translated to <len> afterwards
@@ -157,11 +157,13 @@ public:
 				iter_double_node->setDoubleNext(curr_double_node);
 			}
 			
+			/*Add an element to the visited vector*/
+			visited.push_back(false);
+
 			/*building the secondary list which is a list of neighbors for a specific primary node.
 			this is a list of simple nodes.*/
 			secondary_list_head = curr_double_node; // head of secondary list
 			iter_simple_node = secondary_list_head; // iterator
-			n++; // count vertices
 			bool another_neighbor_exists = true; // flag indicating there're more neighbors to come
 			find_start = semicolon + 1; // start position for the "find" function
 			while (another_neighbor_exists) {
@@ -201,10 +203,7 @@ public:
 			}
 			
 		} while (find_start < s_size);
-
-		/*allocate an array indicating if a node was visited before - used in BFS search*/
-		num_of_vertices = n;
-		visited_array = (bool*)malloc(sizeof(bool) * num_of_vertices);
+		
 	}
 
 	// getters
@@ -214,25 +213,25 @@ public:
 	int getNumOfVertices() {
 		return num_of_vertices;
 	}
-	bool* getVisitedArray(){
-		return visited_array;
+	vector<bool> getVisited(){
+		return visited;
 	}
 	Queue getQ() {
 		return Q;
 	}
 
 	// setters
-	void setVisitedArray(int position, bool boolean_value) {
-		visited_array[position] = boolean_value;
+	void setVisited(int position, bool boolean_value) {
+		visited[position] = boolean_value;
 	}
 
 	/*The BFS search function. searches nodes by breadth, their distance from origin*/
 	void BFS_Search() {
 		for (int i = 1; i <= num_of_vertices; i++) { // for every vertex x in V
-			visited_array[i] = false; // visited[x] = false
+			visited[i] = false; // visited[x] = false
 		}
 		cout << getNeighborsList()->getValue() << endl; // print v
-		setVisitedArray(getNeighborsList()->getValue(), true); // visited[v] = TRUE
+		setVisited(getNeighborsList()->getValue()-1, true); // visited[v] = TRUE
 		Q = getQ();
 		
 		/*Allocate an item to enqueue - a node without its next pointers*/
@@ -254,9 +253,9 @@ public:
 			/*iterate over neighbors of x*/
 			Simple_Node* y = x->getSimpleNext(); // y is the first neighbor of x
 			while (y != NULL) { // for every neighbor y of x
-				if (!getVisitedArray()[y->getValue()]) { // if(not visited[y])
+				if (!getVisited()[y->getValue()-1]) { // if(not visited[y])
 					cout << y->getValue() << endl; // print y
-					getVisitedArray()[y->getValue()] = true; // visited[y] = true
+					setVisited(y->getValue()-1, true); // visited[y] = true
 					
 					/*Allocate an item to enqueue - a node without its next pointers*/
 					Double_Node* item_to_enqueue = (Double_Node*) malloc(sizeof(Double_Node)); // initialize item
